@@ -1,0 +1,10 @@
+cmake_minimum_required (VERSION 3.1)
+project(ft-media)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CXX_EXTENSIONS NO)
+set(CXX_STANDARD_REQUIRED YES)
+
+add_subdirectory(ft-media-lib)
+
+add_executable(ft-media-server main.cpp)
