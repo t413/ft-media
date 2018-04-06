@@ -1,12 +1,14 @@
 #include <string>
 
+namespace ftm {
 
-
-class Server {
-public:
-    Server();
-    int run(int argc, char *argv[]);
+    class Server {
+    public:
+        Server();
+        int run(int argc, char *argv[]);
     
 
 
-};
+    };
+
+}

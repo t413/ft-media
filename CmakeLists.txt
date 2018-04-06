@@ -8,3 +8,4 @@ set(CXX_STANDARD_REQUIRED YES)
 add_subdirectory(ft-media-lib)
 
 add_executable(ft-media-server main.cpp)
+target_link_libraries(ft-media-server ft-media-lib)
