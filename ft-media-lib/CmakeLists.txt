@@ -9,8 +9,12 @@ list(APPEND HEADERS "addons/CLI11.hpp")
 find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
 find_library(AVCODEC_LIBRARY avcodec)
 
+find_path(FT_INCLUDE_DIR flaschen-taschen.h HINTS "${FT_LOCATION}/api/include")
+find_library(FT_LIBRARY ftclient HINTS "${FT_LOCATION}/api/lib")
+
+
 add_library(${PROJ_NAME} ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJ_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_include_directories(${PROJ_NAME} PRIVATE ${AVCODEC_INCLUDE_DIR})
-target_link_libraries(${PROJ_NAME} PRIVATE ${AVCODEC_LIBRARY})
+target_include_directories(${PROJ_NAME} PRIVATE ${AVCODEC_INCLUDE_DIR} ${FT_INCLUDE_DIR})
+target_link_libraries(${PROJ_NAME} PRIVATE ${AVCODEC_LIBRARY} ${FT_LIBRARY})
