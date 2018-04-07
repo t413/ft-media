@@ -36,14 +36,16 @@ namespace ftm {
         AVFrame* frame_ = NULL;
         vector<uint8_t> buffer_;
 
-        MediaCtx(AVFormatContext* ctx, enum AVMediaType type) {
+        MediaCtx(AVFormatContext* ctx, enum AVMediaType type) : ctx_(ctx) {
             index_ = getStreamType(ctx, type);
             if (index_ < 0) throw runtime_error("finding stream error");
 
-            const AVCodecParameters& params = * ctx->streams[index_]->codecpar;
-            decoder_ = avcodec_find_decoder(params.codec_id);
+            AVCodecParameters const* params = ctx->streams[index_]->codecpar;
+            decoder_ = avcodec_find_decoder(params->codec_id);
             if (!decoder_ ) throw runtime_error("Unsupported codec");
             checkAlloc(codecContext_ = avcodec_alloc_context3(decoder_));
+            if (avcodec_parameters_to_context(codecContext_, params) < 0)
+                throw runtime_error("Can't copy codec params");
             if (avcodec_open2(codecContext_, decoder_, NULL) < 0)
                 throw runtime_error("Can't open video codec");
 
@@ -62,14 +64,15 @@ namespace ftm {
         struct SwsContext* scaler_ = NULL;
 
         VideoCtx(AVFormatContext* ctx, UDPFTPtr disp) : MediaCtx(ctx, AVMEDIA_TYPE_VIDEO) {
-            const AVCodecParameters& params = * ctx->streams[index_]->codecpar;
             fps_ = av_q2d(ctx_->streams[index_]->avg_frame_rate);
             if (fps_ < 0)
-                fps_ = 1.0 / av_q2d(ctx_->streams[index_]->codec->time_base);
+                fps_ = 1.0 / av_q2d(ctx_->streams[index_]->time_base);
 
             checkAlloc(rgbFrame_ = av_frame_alloc());
 
-            int size = av_image_get_buffer_size(AV_PIX_FMT_RGB24, codecContext_->width, codecContext_->height, 1);
+            const AVCodecParameters& params = * ctx->streams[index_]->codecpar;
+            int size = av_image_get_buffer_size(AV_PIX_FMT_RGB24, params.width, params.height, 1);
+            assert(size > 0);
             buffer_.resize((size_t) size);
 
             av_image_fill_arrays(rgbFrame_->data, rgbFrame_->linesize, buffer_.data(), AV_PIX_FMT_RGB24,
@@ -150,9 +153,9 @@ namespace ftm {
         VideoCtx::Ptr video;
         AudioCtx::Ptr audio;
         try { video.reset(new VideoCtx(avCtx_, display_)); }
-        catch (runtime_error e) { ctx_.debug(string(e.what())); }
+        catch (runtime_error e) { ctx_.debug("video " + string(e.what())); }
         try { audio.reset(new AudioCtx(avCtx_)); }
-        catch (runtime_error e) { ctx_.debug(string(e.what())); }
+        catch (runtime_error e) { ctx_.debug("audio " + string(e.what())); }
 
 
         // Read frames and send to FlaschenTaschen.

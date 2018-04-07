@@ -3,8 +3,8 @@
 #include <vector>
 #include <list>
 
-class AVFrame;
-class AVFormatContext;
+struct AVFrame;
+struct AVFormatContext;
 class UDPFlaschenTaschen;
 
 namespace ftm {

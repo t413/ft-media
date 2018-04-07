@@ -15,15 +15,19 @@ find_library(AVUTIL_LIBRARY avutil)
 find_path(FT_INCLUDE_DIR flaschen-taschen.h HINTS "${FT_LOCATION}/api/include")
 find_library(FT_LIBRARY ftclient HINTS "${FT_LOCATION}/api/lib")
 
+find_path(AO_INCLUDE_DIR ao/ao.h)
+find_library(AO_LIBRARY ao)
+
 
 add_library(${PROJ_NAME} ${SOURCES} ${HEADERS})
 
 target_include_directories(${PROJ_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_include_directories(${PROJ_NAME} PRIVATE ${AVCODEC_INCLUDE_DIR} ${FT_INCLUDE_DIR})
+target_include_directories(${PROJ_NAME} PRIVATE ${AVCODEC_INCLUDE_DIR} ${FT_INCLUDE_DIR} ${AO_INCLUDE_DIR})
 target_link_libraries(${PROJ_NAME} PRIVATE
         ${AVCODEC_LIBRARY}
         ${FT_LIBRARY}
         ${AVFORMT_LIBRARY}
         ${SWSCALE_LIBRARY}
         ${AVUTIL_LIBRARY}
+        ${AO_LIBRARY}
 )
