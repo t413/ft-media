@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 #include <list>
 #include "addons/CLI11.hpp"
 

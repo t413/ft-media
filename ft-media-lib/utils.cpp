@@ -8,14 +8,14 @@ namespace ftm {
 
     namespace util {
 
-        double timeNow() {
+        int64_t timeMs() {
             struct timeval tp;
             gettimeofday(&tp, NULL);
-            return tp.tv_sec + tp.tv_usec;
+            return tp.tv_sec * 1000 + tp.tv_usec / 1000;
         }
 
-        int64_t timeMs() {
-            return (int64_t) (util::timeNow() * 1000);
+        double timeNow() {
+            return util::timeMs() / 1000.0;
         }
 
         std::string join(const StringVec &l, std::string sep) {

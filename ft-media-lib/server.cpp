@@ -20,7 +20,9 @@ namespace ftm {
             offx_(0),
             offy_(0),
             offz_(3) {
-        options_.add_flag("-v,--verbose", verbosity_, "Set the verbosity");
+        options_.add_flag(  "-v,--verbose",   verbosity_, "Set the verbosity");
+        options_.set_help_flag("--help", options_.get_help_ptr()->get_description());
+        options_.add_option("-h,--host",      host_, "UDP host to transmit to");
         options_.add_option("-g,--geometry",  bind(&Server::parseGeometry, this, _1), "<W>x<H>[+<X>+<Y>[+<layer>]]");
         options_.add_option("-t,--minrepeat", minRepeatTime_, "minimum time to play a video, will repeat");
         options_.add_option("gifs,-f,--gifs", files_, "");

@@ -207,12 +207,12 @@ namespace ftm {
                 break;
 
             av_seek_frame(avCtx_, -1, 1, AVSEEK_FLAG_FRAME); //start playing from the beginning
-            if (ctx_.verbosity_ > 1)
+            if (ctx_.verbosity_ > 0)
                 cout << "loop " << repeated_count << " done after " << elapsed << "s (" << frame_count << " frames)" << endl;
         }
 
         avformat_close_input(&avCtx_);
-        if (ctx_.verbosity_ > 1)
+        if (ctx_.verbosity_ >= 0)
             cout << "Finished playing " << frame_count << " for " << (util::timeNow() - startTime) << "s total" << endl;
     }
 
