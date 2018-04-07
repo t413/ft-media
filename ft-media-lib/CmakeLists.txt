@@ -4,8 +4,8 @@ project(${PROJ_NAME})
 file(GLOB SOURCES "*.cpp" )
 file(GLOB HEADERS "*.h" )
 
-# find_package(OpenCV 3.0.0 QUIET)
-# message(STATUS "OpenCV found: ${OpenCV_FOUND}")
+list(APPEND HEADERS "addons/CLI11.hpp")
+
 find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
 find_library(AVCODEC_LIBRARY avcodec)
 
