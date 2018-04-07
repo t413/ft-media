@@ -18,9 +18,11 @@ namespace ftm {
         void debug(std::string) const;
         bool parseGeometry(std::vector<std::string>);
 
+        int verbosity_ = 0; //0 normal, 1 extra, 2 cray
+        bool isRunning_ = true;
+        double minRepeatTime_ = 0;
     protected:
         CLI::App options_;
-        int verbosity_{1}; //0 none, 1 normal, 2 extra, 3 cray
 
         std::string host_;
         int height_, width_, offx_, offy_, offz_;

@@ -1,18 +1,11 @@
 #include "server.h"
 #include "utils.h"
+#include "mediaplayer.h"
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
-#include <getopt.h>
 #include <signal.h>
-#include <sys/time.h>
 #include <udp-flaschen-taschen.h>
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
-#include <ao/ao.h>
-}
 
 
 namespace ftm {
@@ -28,12 +21,13 @@ namespace ftm {
             offy_(0),
             offz_(3) {
         options_.add_flag("-v,--verbose", verbosity_, "Set the verbosity");
-        options_.add_option("-g,--geometry", bind(&Server::parseGeometry, this, _1), "<W>x<H>[+<X>+<Y>[+<layer>]]");
+        options_.add_option("-g,--geometry",  bind(&Server::parseGeometry, this, _1), "<W>x<H>[+<X>+<Y>[+<layer>]]");
+        options_.add_option("-t,--minrepeat", minRepeatTime_, "minimum time to play a video, will repeat");
         options_.add_option("gifs,-f,--gifs", files_, "");
     }
 
-    volatile bool interrupt_received = false;
-    static void InterruptHandler(int) { interrupt_received = true; }
+    volatile bool* isRunningPtr = NULL;
+    static void InterruptHandler(int) { if (isRunningPtr) *isRunningPtr = false; }
 
     bool Server::init() {
         const int ft_socket = OpenFlaschenTaschenSocket(host_.c_str());
@@ -45,28 +39,29 @@ namespace ftm {
         display_.reset(new UDPFlaschenTaschen(ft_socket, height_, width_));
         display_->SetOffset(offx_, offy_, offz_);
 
-        // Register all formats and codecs
-        av_register_all();
-        avformat_network_init();
+        MediaPlayer::Init();
 
+        isRunningPtr = &isRunning_;
         signal(SIGTERM, InterruptHandler);
         signal(SIGINT, InterruptHandler);
 
         debug("got files: " + util::join(files_));
         int numberPlayed = 0;
         for (const string &video : files_) {
-
-            //bool playresult = PlayVideo(movie_file, display, audio_id, verbose, repeatTimeout);
-            //if (playresult)
+            try {
+                MediaPlayer media(video, *this, display_);
+                media.play();
                 numberPlayed++;
-
-            if (interrupt_received) {
+            } catch (runtime_error e) {
+                debug("error playing " + video + ": " + string(e.what()));
+            }
+            if (!isRunning_) {
                 debug("Got interrupt. Exiting");
                 break;
             }
-            display_->Clear();
-            display_->Send();
         }
+        display_->Clear();
+        display_->Send();
         return !numberPlayed;
     }
 
